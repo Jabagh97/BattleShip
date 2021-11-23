@@ -69,6 +69,7 @@ const shipArray = [
   },
 ]
 //Draw the ships in random locations
+
 function generate(ship) {
   let randomDirection = Math.floor(Math.random() * ship.directions.length)
   let current = ship.directions[randomDirection]
@@ -88,6 +89,29 @@ generate(shipArray[0])
 generate(shipArray[1])
 generate(shipArray[2])
 generate(shipArray[3])
+
+
+function generate2(ship) {
+  let randomDirection = Math.floor(Math.random() * ship.directions.length)
+  let current = ship.directions[randomDirection]
+  if (randomDirection === 0) direction = 1
+  if (randomDirection === 1) direction = 10
+  let randomStart = Math.abs(Math.floor(Math.random() * user2Squares.length - (ship.directions[0].length * direction)))
+
+  const isTaken = current.some(index => user2Squares[randomStart + index].classList.contains('taken'))
+  const isAtRightEdge = current.some(index => (randomStart + index) % width === width - 1)
+  const isAtLeftEdge = current.some(index => (randomStart + index) % width === 0)
+
+  if (!isTaken && !isAtRightEdge && !isAtLeftEdge) current.forEach(index => user2Squares[randomStart + index].classList.add('taken', ship.name))
+
+  else generate2(ship)
+}
+generate2(shipArray[0])
+generate2(shipArray[1])
+generate2(shipArray[2])
+generate2(shipArray[3])
+
+//MultiPlayer connctions
 
 
 
