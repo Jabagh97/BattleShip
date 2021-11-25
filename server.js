@@ -7,7 +7,6 @@ const app = express()
 const server = http.createServer(app)
 const io = socketio(server)
 
-
 app.use(express.static(path.join(__dirname, "public")))
 
 // Start server
@@ -38,13 +37,13 @@ io.on('connection', socket => {
   socket.broadcast.emit('player-connection', playerIndex)
 
 
-  // On Ready
+  // On Ready connction listener
   socket.on('player-ready', () => {
     socket.broadcast.emit('enemy-ready', playerIndex)
     connections[playerIndex] = true
   })
 
-  // Check player connections
+  // Check connections
   socket.on('check-players', () => {
     const players = []
     for (const i in connections) {
@@ -53,5 +52,20 @@ io.on('connection', socket => {
     socket.emit('check-players', players)
   })
 
-  
+  // On Fire Received
+  socket.on('fire', id => {
+    console.log(`Shot fired from ${playerIndex}`, id)
+
+    // Emit the move to the other player
+    socket.broadcast.emit('fire', id)
+   // console.log("sent back")
+  })
+
+  // on Fire Reply
+  socket.on('fire-reply', square => {
+    console.log(square)
+
+    // Forward the reply to the other player
+    socket.broadcast.emit('fire-reply', square)
+  })
 })
