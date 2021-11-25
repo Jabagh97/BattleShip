@@ -8,23 +8,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const battleship = document.querySelector('.battleship_')
   const carrier = document.querySelector('.carrier_')
   const startButton = document.querySelector('#start')
-  const rotateButton = document.querySelector('#rotate')
   const turnDisplay = document.querySelector('#turn')
   const infoDisplay = document.querySelector('#info')
-  const setupButtons = document.getElementById('setup-buttons')
+  const multiPlayerButton = document.querySelector('#multiPlayerButton')
+  const readyButton = document.querySelector('#ready')
+
+
+//make sure it's not null
+if(multiPlayerButton){
+  multiPlayerButton.addEventListener('click',startMultiPlayer)
+}
 
   const user1Squares = []
   const user2Squares = []
 
-  let isHorizontal = true
+ 
   let isGameOver = false
   let currentPlayer = 'user'
   let playerNum = 0
   let ready = false
   let enemyReady = false
-  let allShipsPlaced = false
   let shotFired = -1
   const width=10
+
+  //const socket = io();
 
 //Create Board
 function createBoard(grid, squares) {
@@ -90,8 +97,7 @@ generate(shipArray[1])
 generate(shipArray[2])
 generate(shipArray[3])
 
-
-function generate2(ship) {
+/*function generate2(ship) {
   let randomDirection = Math.floor(Math.random() * ship.directions.length)
   let current = ship.directions[randomDirection]
   if (randomDirection === 0) direction = 1
@@ -111,17 +117,51 @@ generate2(shipArray[1])
 generate2(shipArray[2])
 generate2(shipArray[3])
 
-//Listeners
+*/
+
+//Multi
+function startMultiPlayer() {
+  
+  const socket =io();
+// Get your player number 0,1
+socket.on('player-number', num => {
+    playerNum = parseInt(num)
+    if(playerNum === 1) currentPlayer = "enemy"
+    console.log(playerNum)
+
+    // Get other player status
+    socket.emit('check-players')
+  
+})
 
 
+// Check player status
+socket.on('check-players', players => {
+  players.forEach((p, i) => {
+    if(p.connected) connectedTurnsGreen(i)
+    if(p.ready) {
+      playerReady(i)
+      if(i !== playerReady) enemyReady = true
+    }
+  })
+})
 
-
-
-//MultiPlayer connctions
+//player connected
+socket.on('player-connection', num => {
+  connectedTurnsGreen(num)
+})
+function connectedTurnsGreen(num) {
+  //add 1 to get the propper player
+  let player = `.player${parseInt(num) + 1}`
+  document.querySelector(`${player} .connected span`).classList.toggle('green')
+  if(parseInt(num) === playerNum) document.querySelector(player).style.fontWeight = 'bold'
+}
+}
 
 
 
 })
+
 
 
   

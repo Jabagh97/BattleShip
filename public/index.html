@@ -4,14 +4,28 @@
     <meta charset="utf-8">
     <title>Battle Ships CS447</title>
     <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"charset="utf-8"></script>
   </head>
 
   <body>
-    <div class="container">
-        <div class="grid grid-user">Player1 </div>
-        <div class="grid grid-user2">Player2</div>      
+    <button id="ready">Ready</button>
+   <button id="multiPlayerButton">Connect</button>
+
+<div class="player player1">Player 1
+  <div class="connected">Connected <span></span> </div>
+  <div class="ready">Ready <span></span></div>
+</div>
+
+    <div class="player player2">Player 2
+      <div class="connected">Connected <span></span> </div>
+      <div class="ready">Ready <span></span></div>
     </div>
+    
+        <div class="container">
+            <div class="grid grid-user">Player1 </div>
+            <div class="grid grid-user2">Player2</div>      
+        </div>
 
   <div class="hidden_info">
         <button id="start">Start Game</button>

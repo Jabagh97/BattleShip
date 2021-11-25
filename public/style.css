@@ -74,3 +74,25 @@
 {
  background-color: black;   
 }
+.connected {
+    font-weight: normal;
+}
+.ready{
+    font-weight: normal;
+}
+.connected span {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background-color: red;
+}
+.ready span{
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background-color: red;
+
+}
+span.green{
+    background: green;
+}
