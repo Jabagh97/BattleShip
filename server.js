@@ -29,8 +29,15 @@ io.on('connection', socket => {
 
   // sending the player number to the connecting players
   socket.emit('player-number', playerIndex)
+console.log(`Player ${playerIndex} `)
+  if (playerIndex === -1) return
 
-  console.log(`Player ${playerIndex} has connected`)
+  socket.on('disconnect', () => {
+    console.log(`Player ${playerIndex} disconnected`)
+    connections[playerIndex] = null
+    // disconnected
+    socket.broadcast.emit('player-connection', playerIndex)
+  })
 
   
   connections[playerIndex] = false

@@ -3,7 +3,7 @@
     height: 400px;
     display: flex;
     flex-wrap: wrap;
-    background-color: burlywood;
+    background-color: rgb(152, 222, 135);
 }
 
 .grid div{
@@ -16,7 +16,7 @@
     height: 400px;
     display: flex;
     flex-wrap: wrap;
-    background-color:brown;
+    background-color:rgb(224, 205, 255);
 }
 .container{
     display: flex;

@@ -111,11 +111,16 @@ function startMultiPlayer() {
 socket.on('player-number', num => {
     playerNum = parseInt(num)
     if(playerNum === 1) currentPlayer = "enemy"
-    console.log(playerNum)
+    console.log("Your player Number"+playerNum)//0 for player 1
 
     // Get other player status
     socket.emit('check-players')
   
+})
+
+//player connected
+socket.on('player-connection', num => {
+  connectedTurnsGreen(num)
 })
 
 // On other player ready
@@ -138,10 +143,8 @@ socket.on('check-players', players => {
   })
 })
 
-//player connected
-socket.on('player-connection', num => {
-  connectedTurnsGreen(num)
-})
+
+
 function connectedTurnsGreen(num) {
   //add 1 to get the propper player
   let player = `.player${parseInt(num) + 1}`
@@ -159,35 +162,55 @@ readyButton.addEventListener('click', () => {
 // Setup event listeners for firing
 user2Squares.forEach(square => {
   square.addEventListener('click', () => {
-    console.log("Fire Listener working")
+    //console.log("Fire Listener working")
+    if(currentPlayer === 'user' && ready && enemyReady) {
     shotFired = square.dataset.id
     socket.emit('fire', shotFired)
+    }
    // console.log("data sent")
   })
 })
  // On Fire Received
  socket.on('fire', id => {
-  console.log("Fire receiver working")
-  enemyGo(id)
+  //console.log("Fire receiver working")
+  enemyFired(id)
   const square = user1Squares[id]
   socket.emit('fire-reply', square.classList)
   playMulti(socket)
 })
 // On Fire Reply Received
 socket.on('fire-reply', classList => {
-  console.log("Fire reply receiver working")
-  shotSquare(classList)
+ // console.log("Fire reply receiver working")
+  user1Fired(classList)
   playMulti(socket)
 })
 }
 //end of startMultiPlayer FUNC
+
+// MultiPlayer
+function playMulti(socket) {
+  if(!ready) {
+    socket.emit('player-ready')
+    ready = true
+    playerReady(playerNum)
+  }
+  //display turns
+  if(enemyReady) {
+    if(currentPlayer === 'user') {
+      turnDisplay.innerHTML = 'Your Go'
+    }
+    if(currentPlayer === 'enemy') {
+      turnDisplay.innerHTML = "Enemy's Go"
+    }
+  }
+}
 
   let user2DestroyerCount = 0
   let user2SubmarineCount = 0
   let user2BattleshipCount = 0
   let user2CarrierCount = 0  
 
-function enemyGo(square) {
+function enemyFired(square) {
   if (!user1Squares[square].classList.contains('boom')) {
     const hit = user1Squares[square].classList.contains('taken')
     user1Squares[square].classList.add(hit ? 'boom' : 'miss')
@@ -196,7 +219,7 @@ function enemyGo(square) {
     if (user1Squares[square].classList.contains('battleship')) user2BattleshipCount++
     if (user1Squares[square].classList.contains('carrier')) user2CarrierCount++
     shipsCheck()
-  } 
+  }
   currentPlayer = 'user'
   turnDisplay.innerHTML = 'Your Go'
 }
@@ -206,8 +229,8 @@ function enemyGo(square) {
   let battleshipCount = 0
   let carrierCount = 0
 
-  function shotSquare(classList) {
-    console.log("Reveal working")
+  function user1Fired(classList) {
+   // console.log("Reveal working")
     const enemySquare = user2Grid.querySelector(`div[data-id='${shotFired}']`)
     const obj = Object.values(classList)
     if (!enemySquare.classList.contains('boom') && currentPlayer === 'user') {
@@ -226,24 +249,6 @@ function enemyGo(square) {
   }
 
 
-// MultiPlayer
-function playMulti(socket) {
-  //if(isGameOver) return
-  if(!ready) {
-    socket.emit('player-ready')
-    ready = true
-    playerReady(playerNum)
-  }
-  //display turns
-  if(enemyReady) {
-    if(currentPlayer === 'user') {
-      turnDisplay.innerHTML = 'Your Go'
-    }
-    if(currentPlayer === 'enemy') {
-      turnDisplay.innerHTML = "Enemy's Go"
-    }
-  }
-}
 //change ready color
 function playerReady(num) {
   let player = `.player${parseInt(num) + 1}`
@@ -254,52 +259,29 @@ let user1DestroyedShips=0
 let user2DestroyedShips=0
 
 function shipsCheck() {
-  let enemy = 'enemy'
   if (destroyerCount === 2) {
-    infoDisplay.innerHTML = `You sunk the ${enemy}'s destroyer`
+   // infoDisplay.innerHTML = `You sunk a destroyer`
     user1DestroyedShips++
+    console.log("You sunk a destroyer")
   }
   if (submarineCount === 3) {
-    infoDisplay.innerHTML = `You sunk the ${enemy}'s submarine`
-    user1DestroyedShips++
-  }
-  if (cruiserCount === 3) {
-    infoDisplay.innerHTML = `You sunk the ${enemy}'s cruiser`
+    console.log("You sunk a submarine")
     user1DestroyedShips++
   }
   if (battleshipCount === 4) {
-    infoDisplay.innerHTML = `You sunk the ${enemy}'s battleship`
+    console.log("You sunk a battleship")
     user1DestroyedShips++
   }
   if (carrierCount === 5) {
-    infoDisplay.innerHTML = `You sunk the ${enemy}'s carrier`
+    console.log("You sunk a carrier")
     user1DestroyedShips++
   }
-  if (user2DestroyerCount === 2) {
-    infoDisplay.innerHTML = `${enemy} sunk your destroyer`
-    user2DestroyedShips++
-  }
-  if (user2SubmarineCount === 3) {
-    infoDisplay.innerHTML = `${enemy} sunk your submarine`
-    user2DestroyedShips++
-  }
-  if (user2BattleshipCount === 4) {
-    infoDisplay.innerHTML = `${enemy} sunk your battleship`
-    user2DestroyedShips++
-  }
-  if (user2CarrierCount === 5) {
-    infoDisplay.innerHTML = `${enemy} sunk your carrier`
-    user2DestroyedShips++
-  }
+  
 
   if (user1DestroyedShips === 5) {
-    infoDisplay.innerHTML = "Winner"
-    
+    infoDisplay.innerHTML = "Winner"    
   }
-  if (user2DestroyedShips === 5) {
-    infoDisplay.innerHTML = `${enemy.toUpperCase()} is the Winner`
-    
-  }
+
 }
 
 
