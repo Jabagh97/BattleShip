@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const multiPlayerButton = document.querySelector('#multiPlayerButton')
   const readyButton = document.querySelector('#ready')
 
+  var audio = new Audio('boom.mp3')
+  var audioWinner= new Audio ('winner.mp3')
+  var audioDown =new Audio ('down.mp3')
+
 
 //make sure it's not null
 if(multiPlayerButton){
@@ -164,7 +168,14 @@ user2Squares.forEach(square => {
   square.addEventListener('click', () => {
     //console.log("Fire Listener working")
     if(currentPlayer === 'user' && ready && enemyReady) {
+    
     shotFired = square.dataset.id
+     
+      //play BOOM BOOM BOOM
+      audioDown.pause()
+      audioDown.currentTime=0
+    audio.play()
+
     socket.emit('fire', shotFired)
     }
    // console.log("data sent")
@@ -189,6 +200,7 @@ socket.on('fire-reply', classList => {
 
 // MultiPlayer
 function playMulti(socket) {
+  if(isGameOver) return
   if(!ready) {
     socket.emit('player-ready')
     ready = true
@@ -233,7 +245,7 @@ function enemyFired(square) {
    // console.log("Reveal working")
     const enemySquare = user2Grid.querySelector(`div[data-id='${shotFired}']`)
     const obj = Object.values(classList)
-    if (!enemySquare.classList.contains('boom') && currentPlayer === 'user') {
+    if (!enemySquare.classList.contains('boom') && currentPlayer === 'user' && !isGameOver) {
       if (obj.includes('destroyer')) destroyerCount++
       if (obj.includes('submarine')) submarineCount++
       if (obj.includes('battleship')) battleshipCount++
@@ -261,26 +273,120 @@ let user2DestroyedShips=0
 function shipsCheck() {
   if (destroyerCount === 2) {
    // infoDisplay.innerHTML = `You sunk a destroyer`
-    user1DestroyedShips++
+    user1DestroyedShips=user1DestroyedShips+1
     console.log("You sunk a destroyer")
+    audioDown.currentTime=0
+    audio.pause()
+    audio.currentTime=0
+    audioDown.play()
+    destroyerCount=0
+    console.log(user1DestroyedShips)
+
   }
   if (submarineCount === 3) {
     console.log("You sunk a submarine")
-    user1DestroyedShips++
+    audioDown.currentTime=0
+    user1DestroyedShips=user1DestroyedShips+1
+    audio.pause()
+    audioDown.play()
+    
+    audio.currentTime=0
+    submarineCount=0
+    console.log(user1DestroyedShips)
   }
   if (battleshipCount === 4) {
     console.log("You sunk a battleship")
-    user1DestroyedShips++
+    audioDown.currentTime=0
+    user1DestroyedShips=user1DestroyedShips+1
+     audio.pause()
+    audioDown.play()
+    audio.pause()
+    audio.currentTime=0
+    battleshipCount=0
+    console.log(user1DestroyedShips)
   }
   if (carrierCount === 5) {
     console.log("You sunk a carrier")
-    user1DestroyedShips++
+    audioDown.currentTime=0
+    user1DestroyedShips=user1DestroyedShips+1
+    audio.pause()
+    audioDown.play()
+    
+    audio.currentTime=0
+    carrierCount=0
+    console.log(user1DestroyedShips)
   }
   
 
-  if (user1DestroyedShips === 5) {
-    infoDisplay.innerHTML = "Winner"    
+  if (user1DestroyedShips === 4) {
+    console.log("Player1 WON")
+   //infoDisplay.innerHTML = "Winner"   
+    audioDown.pause
+    audioDown.currentTime=0
+    //audio.pause() 
+    audio.currentTime=0
+    audioWinner.play()
+    isGameOver = true
+
   }
+
+  if (user2DestroyerCount === 2) {
+    // infoDisplay.innerHTML = `You sunk a destroyer`
+    user2DestroyedShips=user2DestroyedShips+1
+     console.log("You sunk a destroyer")
+     audioDown.currentTime=0
+     audio.pause()
+     audioDown.play()
+     audio.currentTime=0
+     user2DestroyerCount=0
+     console.log(user2DestroyedShips)
+ 
+   }
+   if (user2SubmarineCount === 3) {
+     console.log("You sunk a submarine")
+     user2DestroyedShips=user2DestroyedShips+1
+     audioDown.currentTime=0
+     audio.pause()
+     audioDown.play()
+     
+     audio.currentTime=0
+     user2SubmarineCount=0
+     console.log(user2DestroyedShips)
+   }
+   if (user2BattleshipCount === 4) {
+     console.log("You sunk a battleship")
+     user2DestroyedShips=user2DestroyedShips+1
+     audioDown.currentTime=0
+     audio.pause()
+     audioDown.play()
+     
+     audio.currentTime=0
+     user2BattleshipCount=0
+     console.log(user2DestroyedShips)
+   }
+   if (user2CarrierCount === 4) {
+     console.log("You sunk a carrier")
+     user2DestroyedShips=user2DestroyedShips+1
+     audioDown.currentTime=0 
+    // audio.pause()
+     audioDown.play()
+    
+     audio.currentTime=0
+     user2CarrierCount=0
+     console.log(user2DestroyedShips)
+   }
+   
+ 
+   if (user2DestroyedShips === 4) {
+ 
+    console.log("Player2 WON")  
+    audioDown.currentTime=0
+     audioDown.pause()
+     audio.pause()    
+
+     audioWinner.play()
+     isGameOver = true
+   }
 
 }
 
