@@ -27,7 +27,7 @@ io.on('connection', socket => {
     }
   }
 
-  // Tell the connecting client what player number they are
+  // sending the player number to the connecting players
   socket.emit('player-number', playerIndex)
 
   console.log(`Player ${playerIndex} has connected`)
@@ -58,14 +58,14 @@ io.on('connection', socket => {
 
     // Emit the move to the other player
     socket.broadcast.emit('fire', id)
-   // console.log("sent back")
+    console.log("sent back perfectly")
   })
 
   // on Fire Reply
   socket.on('fire-reply', square => {
     console.log(square)
 
-    // Forward the reply to the other player
+    // reply to the other player
     socket.broadcast.emit('fire-reply', square)
   })
 })

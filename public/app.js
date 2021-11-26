@@ -31,6 +31,10 @@ if(multiPlayerButton){
   let shotFired = -1
   const width=10
 
+
+  let randomDirection =0
+  let current=0
+  let randomStart=0
   //const socket = io();
 
 //Create Board
@@ -75,59 +79,31 @@ const shipArray = [
     ]
   },
 ]
+//generate p1 ships
+function generate(ship) {
+  randomDirection = Math.floor(Math.random() * ship.directions.length)
+  current = ship.directions[randomDirection]
+  if (randomDirection === 0) direction = 1
+  if (randomDirection === 1) direction = 10
+  randomStart = Math.abs(Math.floor(Math.random() * user1Squares.length - (ship.directions[0].length * direction)))
 
+  const isTaken = current.some(index => user1Squares[randomStart + index].classList.contains('taken'))
+  const isAtRightEdge = current.some(index => (randomStart + index) % width === width - 1)
+  const isAtLeftEdge = current.some(index => (randomStart + index) % width === 0)
+
+  if (!isTaken && !isAtRightEdge && !isAtLeftEdge) current.forEach(index => user1Squares[randomStart + index].classList.add('taken', ship.name))
+
+  else generate(ship)
+}
+generate(shipArray[0])
+generate(shipArray[1])
+generate(shipArray[2])
+generate(shipArray[3])
 
 
 
 //Multi
 function startMultiPlayer() {
-
-///NEED TO BE FIXED
-
-  //generate p1 ships
-  function generate(ship) {
-    let randomDirection = Math.floor(Math.random() * ship.directions.length)
-    let current = ship.directions[randomDirection]
-    if (randomDirection === 0) direction = 1
-    if (randomDirection === 1) direction = 10
-    let randomStart = Math.abs(Math.floor(Math.random() * user1Squares.length - (ship.directions[0].length * direction)))
-  
-    const isTaken = current.some(index => user1Squares[randomStart + index].classList.contains('taken'))
-    const isAtRightEdge = current.some(index => (randomStart + index) % width === width - 1)
-    const isAtLeftEdge = current.some(index => (randomStart + index) % width === 0)
-  
-    if (!isTaken && !isAtRightEdge && !isAtLeftEdge) current.forEach(index => user1Squares[randomStart + index].classList.add('taken', ship.name))
-  
-    else generate(ship)
-  }
-  generate(shipArray[0])
-  generate(shipArray[1])
-  generate(shipArray[2])
-  generate(shipArray[3])
-
-  //NEED TO BE FIXED
-
-  //generate p2 ships
-  function generate2(ship) {
-    let randomDirection = Math.floor(Math.random() * ship.directions.length)
-  let current = ship.directions[randomDirection]
-  if (randomDirection === 0) direction = 1
-  if (randomDirection === 1) direction = 10
-  let randomStart = Math.abs(Math.floor(Math.random() * user2Squares.length - (ship.directions[0].length * direction)))
-
-  const isTaken = current.some(index => user2Squares[randomStart + index].classList.contains('taken'))
-  const isAtRightEdge = current.some(index => (randomStart + index) % width === width - 1)
-  const isAtLeftEdge = current.some(index => (randomStart + index) % width === 0)
-
-  if (!isTaken && !isAtRightEdge && !isAtLeftEdge) current.forEach(index => user2Squares[randomStart + index].classList.add('taken', ship.name))
-
-  else generate2(ship)
-}
-generate2(shipArray[0])
-generate2(shipArray[1])
-generate2(shipArray[2])
-generate2(shipArray[3])
-
 
   //conncetion socket
   const socket =io();
@@ -200,7 +176,7 @@ user2Squares.forEach(square => {
 // On Fire Reply Received
 socket.on('fire-reply', classList => {
   console.log("Fire reply receiver working")
-  revealSquare(classList)
+  shotSquare(classList)
   playMulti(socket)
 })
 }
@@ -219,20 +195,18 @@ function enemyGo(square) {
     if (user1Squares[square].classList.contains('submarine')) user2SubmarineCount++
     if (user1Squares[square].classList.contains('battleship')) user2BattleshipCount++
     if (user1Squares[square].classList.contains('carrier')) user2CarrierCount++
-    //checkForWins()
+    shipsCheck()
   } 
   currentPlayer = 'user'
   turnDisplay.innerHTML = 'Your Go'
 }
-
-
 //rev
   let destroyerCount = 0
   let submarineCount = 0
   let battleshipCount = 0
   let carrierCount = 0
 
-  function revealSquare(classList) {
+  function shotSquare(classList) {
     console.log("Reveal working")
     const enemySquare = user2Grid.querySelector(`div[data-id='${shotFired}']`)
     const obj = Object.values(classList)
@@ -247,18 +221,9 @@ function enemyGo(square) {
     } else {
       enemySquare.classList.add('miss')
     }
-   // checkForWins()
+   shipsCheck()
     currentPlayer = 'enemy'
   }
-
-
-
-
-
-
-
-
-
 
 
 // MultiPlayer
@@ -285,9 +250,59 @@ function playerReady(num) {
   document.querySelector(`${player} .ready span`).classList.toggle('green')
 }
 
+let user1DestroyedShips=0
+let user2DestroyedShips=0
+
+function shipsCheck() {
+  let enemy = 'enemy'
+  if (destroyerCount === 2) {
+    infoDisplay.innerHTML = `You sunk the ${enemy}'s destroyer`
+    user1DestroyedShips++
+  }
+  if (submarineCount === 3) {
+    infoDisplay.innerHTML = `You sunk the ${enemy}'s submarine`
+    user1DestroyedShips++
+  }
+  if (cruiserCount === 3) {
+    infoDisplay.innerHTML = `You sunk the ${enemy}'s cruiser`
+    user1DestroyedShips++
+  }
+  if (battleshipCount === 4) {
+    infoDisplay.innerHTML = `You sunk the ${enemy}'s battleship`
+    user1DestroyedShips++
+  }
+  if (carrierCount === 5) {
+    infoDisplay.innerHTML = `You sunk the ${enemy}'s carrier`
+    user1DestroyedShips++
+  }
+  if (user2DestroyerCount === 2) {
+    infoDisplay.innerHTML = `${enemy} sunk your destroyer`
+    user2DestroyedShips++
+  }
+  if (user2SubmarineCount === 3) {
+    infoDisplay.innerHTML = `${enemy} sunk your submarine`
+    user2DestroyedShips++
+  }
+  if (user2BattleshipCount === 4) {
+    infoDisplay.innerHTML = `${enemy} sunk your battleship`
+    user2DestroyedShips++
+  }
+  if (user2CarrierCount === 5) {
+    infoDisplay.innerHTML = `${enemy} sunk your carrier`
+    user2DestroyedShips++
+  }
+
+  if (user1DestroyedShips === 5) {
+    infoDisplay.innerHTML = "Winner"
+    
+  }
+  if (user2DestroyedShips === 5) {
+    infoDisplay.innerHTML = `${enemy.toUpperCase()} is the Winner`
+    
+  }
+}
 
 
-  
 
 })
 
